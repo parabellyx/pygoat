@@ -3,6 +3,30 @@ on:
   push:
     branches:
       - master # or the name of your main branch
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      # - uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+# name: Build
+# on:
+#   push:
+#     branches:
+#       - master # or the name of your main branch
 
 # jobs:
 #   build:
@@ -67,30 +91,30 @@ on:
       #     pip install semgrep
       #     semgrep ci --json
 
-jobs:
-  semgrep:
-    # User-definable name of this GitHub Actions job:
-    name: Scan
-    # If you are self-hosting, change the following `runs-on` value: 
-    runs-on: ubuntu-latest
+# jobs:
+#   semgrep:
+#     # User-definable name of this GitHub Actions job:
+#     name: Scan
+#     # If you are self-hosting, change the following `runs-on` value: 
+#     runs-on: ubuntu-latest
 
-    container:
-      # A Docker image with Semgrep installed. Do not change this.
-      image: returntocorp/semgrep
+#     container:
+#       # A Docker image with Semgrep installed. Do not change this.
+#       image: returntocorp/semgrep
 
-    # Skip any PR created by dependabot to avoid permission issues:
-    if: (github.actor != 'dependabot[bot]')
+#     # Skip any PR created by dependabot to avoid permission issues:
+#     if: (github.actor != 'dependabot[bot]')
 
-    steps:
-      # Fetch project source with GitHub Actions Checkout.
-      - uses: actions/checkout@v3
-      - run: apk add curl
-      # Run the "semgrep ci" command on the command line of the docker image.
-      - run: semgrep ci --json > semgrep.json || true 
-        env:
-           # Add the rules that Semgrep uses by setting the SEMGREP_RULES environment variable. 
-           SEMGREP_RULES: p/default # more at semgrep.dev/explore
-      - shell: bash
-        run: |
-          cat semgrep.json
-          curl -X POST "https://${{ secrets.DJ_URL }}/api/v2/import-scan/" -H  "accept: application/json" -H  "Content-Type: multipart/form-data"  -H "Authorization: Token ${{ secrets.DJ_TOKEN }}" -F "minimum_severity=Info" -F "active=true" -F "verified=true" -F "scan_type=Semgrep JSON Report" -F "close_old_findings=false" -F "push_to_jira=false" -F "product_name=${{ secrets.DJ_PRODUCT }}" -F "scan_date=$(date +%Y-%m-%d)" -F "engagement_name=$(date +%Y-%m)" -F "file=@semgrep.json"
+#     steps:
+#       # Fetch project source with GitHub Actions Checkout.
+#       - uses: actions/checkout@v3
+#       - run: apk add curl
+#       # Run the "semgrep ci" command on the command line of the docker image.
+#       - run: semgrep ci --json > semgrep.json || true 
+#         env:
+#            # Add the rules that Semgrep uses by setting the SEMGREP_RULES environment variable. 
+#            SEMGREP_RULES: p/default # more at semgrep.dev/explore
+#       - shell: bash
+#         run: |
+#           cat semgrep.json
+#           curl -X POST "https://${{ secrets.DJ_URL }}/api/v2/import-scan/" -H  "accept: application/json" -H  "Content-Type: multipart/form-data"  -H "Authorization: Token ${{ secrets.DJ_TOKEN }}" -F "minimum_severity=Info" -F "active=true" -F "verified=true" -F "scan_type=Semgrep JSON Report" -F "close_old_findings=false" -F "push_to_jira=false" -F "product_name=${{ secrets.DJ_PRODUCT }}" -F "scan_date=$(date +%Y-%m-%d)" -F "engagement_name=$(date +%Y-%m)" -F "file=@semgrep.json"
