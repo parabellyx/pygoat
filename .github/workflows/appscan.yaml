@@ -18,10 +18,13 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=pygoat
-      - name: SBOM Generate
+      - name: Install cyclonedx
         shell: bash
         run: |
           pip install cyclonedx-bom
+      - name: Generate SBOM
+        shell: bash
+        run: |
           cyclonedx-py -r
       - uses: actions/upload-artifact@v3
         with:
