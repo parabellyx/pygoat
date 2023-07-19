@@ -11,13 +11,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=pygoat
+#       - uses: sonarsource/sonarqube-scan-action@master
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#         with:
+#           args: >
+#             -Dsonar.projectKey=pygoat
       - name: Install cyclonedx
         shell: bash
         run: |
@@ -25,7 +25,7 @@ jobs:
       - name: Generate SBOM
         shell: bash
         run: |
-          cyclonedx-py -r
+          cyclonedx-py -h
       - uses: actions/upload-artifact@v3
         with:
           name: SBOM Artifact
