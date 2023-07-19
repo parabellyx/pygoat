@@ -25,6 +25,7 @@ jobs:
       - name: Generate SBOM
         shell: bash
         run: |
+          ls -al
           cyclonedx-py -h
       - uses: actions/upload-artifact@v3
         with:
